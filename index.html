@@ -1,0 +1,132 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HV AI Studio</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;background:#090910;color:white;
+ font-family:Arial,sans-serif;
+}
+header{
+ padding:22px 7%;display:flex;
+ justify-content:space-between;align-items:center;
+ border-bottom:1px solid #292438;
+}
+.logo{font-size:25px;font-weight:bold;color:#a78bfa}
+.logo span{color:white}
+.tag{color:#aaa;font-size:13px}
+main{max-width:850px;margin:55px auto;padding:20px}
+h1{text-align:center;font-size:36px}
+h1 span{color:#a78bfa}
+.sub{text-align:center;color:#aaa;line-height:1.8}
+.panel{
+ background:#151420;border:1px solid #302943;
+ padding:25px;border-radius:18px;margin-top:35px;
+}
+label{display:block;margin:18px 0 10px;font-weight:bold}
+textarea,select{
+ width:100%;background:#0c0b14;
+ border:1px solid #393149;border-radius:10px;
+ padding:14px;color:white;font-size:15px;
+}
+textarea{height:140px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+button{
+ width:100%;padding:16px;border:0;
+ border-radius:12px;background:linear-gradient(90deg,#7041d8,#a855f7);
+ color:white;font-size:17px;font-weight:bold;
+ margin-top:25px;cursor:pointer;
+}
+button:active{opacity:.8}
+.note{color:#aaa;font-size:12px;text-align:center;margin-top:15px}
+#message{
+ display:none;background:#211b34;
+ border:1px solid #7041d8;padding:15px;
+ border-radius:10px;margin-top:20px;line-height:1.7;
+}
+footer{text-align:center;color:#777;padding:35px;font-size:13px}
+@media(max-width:550px){
+ h1{font-size:28px}
+ .grid{grid-template-columns:1fr}
+ main{margin:25px auto}
+}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="logo">HV <span>AI STUDIO</span></div>
+ <div class="tag">AI VIDEO GENERATOR</div>
+</header>
+
+<main>
+ <h1>اصنع فيديوهاتك <span>بالذكاء الاصطناعي</span></h1>
+ <p class="sub">
+ حول أفكارك إلى فيديوهات إبداعية باستخدام الذكاء الاصطناعي.
+ اكتب وصف الفيديو واترك الباقي للتقنية.
+ </p>
+
+ <section class="panel">
+  <label>وصف الفيديو (Prompt)</label>
+  <textarea id="prompt" placeholder="اكتب وصف الفيديو الذي تريد إنشاءه بالتفصيل..."></textarea>
+
+  <div class="grid">
+   <div>
+    <label>مدة الفيديو</label>
+    <select id="duration">
+     <option value="15">15 Seconds</option>
+     <option value="30">30 Seconds</option>
+    </select>
+   </div>
+   <div>
+    <label>أبعاد الفيديو</label>
+    <select id="ratio">
+     <option value="9:16">9:16 - TikTok / Shorts</option>
+     <option value="16:9">16:9 - YouTube</option>
+     <option value="1:1">1:1 - Square</option>
+    </select>
+   </div>
+  </div>
+
+  <label>أسلوب الفيديو</label>
+  <select id="style">
+   <option>Cinematic</option>
+   <option>Realistic</option>
+   <option>Anime</option>
+   <option>3D Animation</option>
+   <option>Fantasy</option>
+   <option>Cartoon</option>
+  </select>
+
+  <button onclick="generate()">Generate Video ✨</button>
+
+  <div id="message"></div>
+  <p class="note">HV AI Studio — Your imagination, powered by AI.</p>
+ </section>
+</main>
+
+<footer>© 2026 HV AI Studio. All rights reserved.</footer>
+
+<script>
+function generate(){
+ const prompt=document.getElementById('prompt').value.trim();
+ const message=document.getElementById('message');
+
+ if(!prompt){
+  alert('من فضلك اكتب وصف الفيديو أولاً');
+  return;
+ }
+
+ message.style.display='block';
+ message.innerHTML=
+ 'تم استلام وصف الفيديو بنجاح! ✨<br>'+
+ 'الواجهة جاهزة، والخطوة التالية هي ربط محرك توليد الفيديو الحقيقي.';
+}
+</script>
+
+</body>
+</html>
