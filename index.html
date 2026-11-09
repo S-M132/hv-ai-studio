@@ -7,34 +7,27 @@
 <title>HV AI Studio</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#090910;color:white;font-family:Arial,sans-serif}
+body{margin:0;background:#090910;color:white;font-family:Arial}
 header{padding:20px 6%;border-bottom:1px solid #30263f}
 .logo{font-size:25px;font-weight:bold;color:#ad82ff}
 .logo span{color:white}
-main{max-width:850px;margin:35px auto;padding:15px}
+main{max-width:850px;margin:30px auto;padding:15px}
 h1{text-align:center;font-size:30px}
 h1 span{color:#ad82ff}
 .desc{text-align:center;color:#aaa;line-height:1.8}
 .panel{background:#171522;padding:22px;border:1px solid #39304a;border-radius:17px;margin-top:25px}
 label{display:block;margin:18px 0 9px;font-weight:bold}
-textarea,select{
-width:100%;padding:14px;background:#0c0b13;
-color:white;border:1px solid #403650;border-radius:10px;font-size:15px
-}
-textarea{height:110px;resize:vertical}
+textarea,select{width:100%;padding:14px;background:#0c0b13;color:white;border:1px solid #403650;border-radius:10px;font-size:15px}
+textarea{height:110px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-button,.download{
-border:0;border-radius:10px;padding:15px;background:#874ce5;
-color:white;font-size:16px;font-weight:bold;cursor:pointer;
-display:block;text-align:center;width:100%;margin-top:20px;text-decoration:none
-}
+button,.download{border:0;border-radius:10px;padding:15px;background:#874ce5;color:white;font-size:16px;font-weight:bold;cursor:pointer;display:block;text-align:center;width:100%;margin-top:20px;text-decoration:none}
 button:disabled{opacity:.5}
-canvas{width:100%;display:block;border-radius:12px;background:#111}
-#result{margin-top:25px;display:none}
+canvas{width:100%;display:block;border-radius:12px;background:#080811}
 video{width:100%;border-radius:12px;margin-top:15px}
-#status{color:#c5a5ff;text-align:center;margin-top:15px}
-.small{color:#999;font-size:12px;text-align:center}
-footer{text-align:center;padding:35px;color:#777}
+#result{display:none;margin-top:20px}
+#status{text-align:center;color:#c5a5ff;margin-top:15px}
+.small{text-align:center;color:#999;font-size:12px}
+footer{text-align:center;padding:30px;color:#777}
 @media(max-width:500px){.grid{grid-template-columns:1fr}h1{font-size:25px}}
 </style>
 </head>
@@ -46,7 +39,7 @@ footer{text-align:center;padding:35px;color:#777}
 
 <main>
 <h1>Create Your <span>Video</span></h1>
-<p class="desc">حوّل أفكارك إلى فيديوهات متحركة بسهولة.</p>
+<p class="desc">حوّل أفكارك إلى مشاهد سينمائية متحركة.</p>
 
 <section class="panel">
 <label>Video Description</label>
@@ -86,13 +79,12 @@ footer{text-align:center;padding:35px;color:#777}
 <video id="preview" controls playsinline></video>
 <a id="download" class="download" download="HV-AI-Video.webm">Download Video ↓</a>
 </div>
-
-<p class="small">Free Video Creator • HV AI Studio</p>
 </section>
 
 <section class="panel">
-<label>Live Preview</label>
+<label>Live Scene Preview</label>
 <canvas id="screen" width="720" height="1280"></canvas>
+<p class="small">Animated Scene Generator • HV AI Studio</p>
 </section>
 </main>
 
@@ -101,170 +93,304 @@ footer{text-align:center;padding:35px;color:#777}
 <script>
 const canvas=document.getElementById('screen');
 const ctx=canvas.getContext('2d');
-let animation=null;
-let start=0;
-let active=false;
+let running=false;
+let startTime=0;
+let animation;
+let previewMode=true;
+
+const palettes={
+purple:['#080817','#55248b','#b88aff'],
+blue:['#031328','#1556a0','#80caff'],
+pink:['#260c25','#853c83','#ffc0ec'],
+dark:['#050508','#292338','#aaa0d0']
+};
 
 function resizeCanvas(){
-const ratio=document.getElementById('ratio').value;
-if(ratio==='9:16'){canvas.width=720;canvas.height=1280}
-if(ratio==='16:9'){canvas.width=1280;canvas.height=720}
-if(ratio==='1:1'){canvas.width=900;canvas.height=900}
+const r=document.getElementById('ratio').value;
+if(r==='9:16'){canvas.width=720;canvas.height=1280}
+if(r==='16:9'){canvas.width=1280;canvas.height=720}
+if(r==='1:1'){canvas.width=900;canvas.height=900}
 }
-document.getElementById('ratio').addEventListener('change',()=>{
-resizeCanvas();
-});
+document.getElementById('ratio').onchange=resizeCanvas;
 resizeCanvas();
 
-function draw(time){
-if(!active)return;
+function text(str,x,y,size,color){
+ctx.fillStyle=color;
+ctx.font='bold '+size+'px Arial';
+ctx.textAlign='center';
+ctx.fillText(str,x,y);
+}
 
-const w=canvas.width,h=canvas.height;
-const t=time/1000;
-const style=document.getElementById('style').value;
-const colors={
-purple:['#170a35','#7139b9'],
-blue:['#031b38','#155caa'],
-pink:['#3c102c','#b54a94'],
-dark:['#080808','#36304c']
-};
-const c=colors[style];
-const gradient=ctx.createLinearGradient(0,0,w,h);
-gradient.addColorStop(0,c[0]);
-gradient.addColorStop(1,c[1]);
-ctx.fillStyle=gradient;
+function drawCity(w,h,t){
+ctx.fillStyle='#080811';
 ctx.fillRect(0,0,w,h);
 
-for(let i=0;i<35;i++){
-const x=(Math.sin(t*.4+i*12)*.5+.5)*w;
-const y=(Math.cos(t*.3+i*7)*.5+.5)*h;
+const p=palettes[document.getElementById('style').value];
+const g=ctx.createLinearGradient(0,0,w,h);
+g.addColorStop(0,p[0]);
+g.addColorStop(1,p[1]);
+ctx.fillStyle=g;
+ctx.fillRect(0,0,w,h);
+
+// Moon
 ctx.beginPath();
-ctx.arc(x,y,2+Math.sin(t+i)*2,0,Math.PI*2);
-ctx.fillStyle='rgba(255,255,255,.45)';
+ctx.arc(w*.75,h*.22,Math.min(w,h)*.09,0,Math.PI*2);
+ctx.fillStyle=p[2];
+ctx.shadowBlur=35;
+ctx.shadowColor=p[2];
+ctx.fill();
+ctx.shadowBlur=0;
+
+// Stars
+for(let i=0;i<65;i++){
+let x=(i*173)%w;
+let y=(i*293)%Math.floor(h*.55);
+ctx.globalAlpha=.3+Math.abs(Math.sin(t+i))*.7;
+ctx.fillStyle='white';
+ctx.beginPath();
+ctx.arc(x,y,2,0,Math.PI*2);
 ctx.fill();
 }
+ctx.globalAlpha=1;
 
-const title=document.getElementById('prompt').value.trim();
-const words=title.length>90?title.slice(0,90)+'...':title;
-const fontSize=Math.min(w*.075,48);
-
-ctx.save();
-ctx.direction='rtl';
-ctx.textAlign='center';
-ctx.fillStyle='rgba(255,255,255,.9)';
-ctx.font='bold '+fontSize+'px Arial';
-
-const lines=[];
-let line='';
-words.split(' ').forEach(word=>{
-if((line+' '+word).length>24){
-lines.push(line);
-line=word;
-}else line+=(line?' ':'')+word;
-});
-if(line)lines.push(line);
-
-const lineHeight=fontSize*1.5;
-const centerY=h/2-(lines.length*lineHeight)/2;
-lines.forEach((l,i)=>{
-ctx.fillText(l,w/2,centerY+i*lineHeight);
-});
-ctx.restore();
-
-ctx.textAlign='center';
-ctx.fillStyle='#ffffff';
-ctx.font='bold '+Math.min(w*.06,35)+'px Arial';
-ctx.fillText('HV AI STUDIO',w/2,h*.91);
-
-ctx.textAlign='center';
-ctx.font='18px Arial';
-ctx.fillStyle='rgba(255,255,255,.65)';
-ctx.fillText('CREATIVE VIDEO STUDIO',w/2,h*.95);
-
-animation=requestAnimationFrame(draw);
+// City buildings
+for(let i=0;i<13;i++){
+let bw=w/10;
+let bh=h*(.12+((i*37)%100)/300);
+let x=i*bw*.85;
+let y=h*.72-bh;
+ctx.fillStyle=i%2?'#111020':'#191329';
+ctx.fillRect(x,y,bw,bh);
+for(let j=0;j<4;j++){
+ctx.fillStyle=p[2];
+ctx.globalAlpha=.25+.25*Math.sin(t*2+i+j);
+ctx.fillRect(x+12+j*14,y+20,5,12);
+}
+}
+ctx.globalAlpha=1;
 }
 
-async function createVideo(){
+function drawWarrior(w,h,t){
+const x=w/2;
+const y=h*.66;
+const s=Math.min(w,h);
+
+ctx.save();
+ctx.translate(x,y);
+ctx.scale(1+Math.sin(t)*.025,1);
+
+// Cape
+ctx.fillStyle='#110b21';
+ctx.beginPath();
+ctx.moveTo(-s*.07,-s*.25);
+ctx.lineTo(-s*.24,s*.25);
+ctx.lineTo(s*.22,s*.25);
+ctx.lineTo(s*.07,-s*.25);
+ctx.closePath();
+ctx.fill();
+
+// Body
+ctx.fillStyle='#171323';
+ctx.fillRect(-s*.075,-s*.28,s*.15,s*.34);
+
+// Head
+ctx.beginPath();
+ctx.arc(0,-s*.34,s*.065,0,Math.PI*2);
+ctx.fillStyle='#08080e';
+ctx.fill();
+
+// Eyes
+ctx.shadowColor='#c18aff';
+ctx.shadowBlur=25;
+ctx.fillStyle='#d4a5ff';
+ctx.fillRect(-s*.04,-s*.35,s*.025,5);
+ctx.fillRect(s*.015,-s*.35,s*.025,5);
+ctx.shadowBlur=0;
+
+ctx.restore();
+}
+
+function drawLightning(w,h,t){
+if(Math.sin(t*3)>-.1){
+ctx.save();
+ctx.strokeStyle='#c69aff';
+ctx.lineWidth=5;
+ctx.shadowColor='#9e53ff';
+ctx.shadowBlur=25;
+ctx.beginPath();
+let x=w*(.2+.6*Math.abs(Math.sin(t)));
+ctx.moveTo(x,0);
+for(let i=1;i<8;i++){
+ctx.lineTo(x+Math.sin(t*9+i)*w*.04,i*h*.1);
+}
+ctx.stroke();
+ctx.restore();
+}
+}
+
+function drawEnergy(w,h,t){
+const x=w/2,y=h*.42;
+const radius=Math.min(w,h)*(.07+Math.abs(Math.sin(t*2))*.045);
+
+ctx.save();
+ctx.shadowColor='#c18aff';
+ctx.shadowBlur=55;
+const g=ctx.createRadialGradient(x,y,2,x,y,radius*2);
+g.addColorStop(0,'white');
+g.addColorStop(.3,'#c58bff');
+g.addColorStop(1,'rgba(120,30,255,0)');
+ctx.fillStyle=g;
+ctx.beginPath();
+ctx.arc(x,y,radius*2,0,Math.PI*2);
+ctx.fill();
+ctx.restore();
+
+for(let i=0;i<8;i++){
+const a=t*1.5+i*Math.PI/4;
+const r=radius*1.7;
+ctx.beginPath();
+ctx.arc(x+Math.cos(a)*r,y+Math.sin(a)*r,5,0,Math.PI*2);
+ctx.fillStyle='#e0bdff';
+ctx.fill();
+}
+}
+
+function render(now){
+if(!running)return;
+
+const w=canvas.width,h=canvas.height;
+const elapsed=(now-startTime)/1000;
+const duration=Number(document.getElementById('duration').value);
+const sceneDuration=duration/4;
+const scene=Math.min(3,Math.floor(elapsed/sceneDuration));
+const local=elapsed%sceneDuration;
+
+drawCity(w,h,elapsed);
+
+// Scene 1: Warrior enters the city
+if(scene===0){
+drawWarrior(w,h,local);
+text('THE MYSTERIOUS WARRIOR',w/2,h*.15,w*.035,'white');
+}
+// Scene 2: Shadow and lightning
+if(scene===1){
+drawLightning(w,h,local);
+drawWarrior(w,h,local);
+text('A DARK POWER AWAKENS',w/2,h*.15,w*.035,'white');
+}
+// Scene 3: Energy awakening
+if(scene===2){
+drawWarrior(w,h,local);
+drawEnergy(w,h,local);
+drawLightning(w,h,local);
+text('UNLEASH THE POWER',w/2,h*.15,w*.04,'white');
+}
+// Scene 4: Final hero shot
+if(scene===3){
+drawWarrior(w,h,local);
+drawEnergy(w,h,local*.4);
+text('THE LEGEND BEGINS',w/2,h*.15,w*.045,'white');
+}
+
+// Prompt title
+ctx.textAlign='center';
+ctx.fillStyle='rgba(255,255,255,.8)';
+ctx.font='20px Arial';
+const title=document.getElementById('prompt').value.slice(0,45);
+ctx.fillText(title,w/2,h*.88);
+
+ctx.fillStyle='white';
+ctx.font='bold 25px Arial';
+ctx.fillText('HV AI STUDIO',w/2,h*.95);
+
+if(running){
+animation=requestAnimationFrame(render);
+}
+}
+
+function createVideo(){
 const prompt=document.getElementById('prompt').value.trim();
-if(!prompt){alert('اكتب وصف الفيديو أولاً');return}
-if(!window.MediaRecorder || !canvas.captureStream){
-alert('متصفحك لا يدعم تسجيل الفيديو. جرب Chrome.');
+const status=document.getElementById('status');
+const btn=document.getElementById('generate');
+const result=document.getElementById('result');
+
+if(!prompt){
+alert('اكتب وصف الفيديو أولاً');
 return;
 }
 
-const btn=document.getElementById('generate');
-const status=document.getElementById('status');
-const result=document.getElementById('result');
-btn.disabled=true;
-result.style.display='none';
-
-try{
-resizeCanvas();
-active=true;
-draw(performance.now());
-
-const stream=canvas.captureStream(30);
-let mime='video/webm';
-if(MediaRecorder.isTypeSupported('video/webm;codecs=vp9')){
-mime='video/webm;codecs=vp9';
-}else if(MediaRecorder.isTypeSupported('video/webm;codecs=vp8')){
-mime='video/webm;codecs=vp8';
-}else if(!MediaRecorder.isTypeSupported('video/webm')){
-throw new Error('صيغة الفيديو غير مدعومة في المتصفح');
+if(!window.MediaRecorder||!canvas.captureStream){
+alert('جرب متصفح Chrome حديث');
+return;
 }
 
-const recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:2500000});
-const chunks=[];
+btn.disabled=true;
+result.style.display='none';
+resizeCanvas();
 
+try{
+running=true;
+startTime=performance.now();
+render(startTime);
+
+const stream=canvas.captureStream(30);
+const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+?'video/webm;codecs=vp9':'video/webm';
+
+const recorder=new MediaRecorder(stream,{
+mimeType:mime,
+videoBitsPerSecond:3000000
+});
+
+let chunks=[];
 recorder.ondataavailable=e=>{
 if(e.data.size>0)chunks.push(e.data);
 };
 
 recorder.onstop=()=>{
-active=false;
+running=false;
 cancelAnimationFrame(animation);
-stream.getTracks().forEach(track=>track.stop());
+stream.getTracks().forEach(t=>t.stop());
 
-const blob=new Blob(chunks,{type:mime});
+const blob=new Blob(chunks,{type:'video/webm'});
 const url=URL.createObjectURL(blob);
-const preview=document.getElementById('preview');
-preview.src=url;
 
-const download=document.getElementById('download');
-download.href=url;
-download.download='HV-AI-Video.webm';
-
+document.getElementById('preview').src=url;
+document.getElementById('download').href=url;
 result.style.display='block';
-status.textContent='Video created successfully!';
+status.textContent='Your video is ready!';
 btn.disabled=false;
 };
 
 recorder.onerror=()=>{
-active=false;
-stream.getTracks().forEach(track=>track.stop());
-status.textContent='Recording error. Please try again.';
+running=false;
+stream.getTracks().forEach(t=>t.stop());
+status.textContent='Recording failed. Try again.';
 btn.disabled=false;
 };
 
 recorder.start();
 
-const seconds=Number(document.getElementById('duration').value);
-let remaining=seconds;
-status.textContent='Creating video... '+remaining+'s';
+const duration=Number(document.getElementById('duration').value);
+status.textContent='Creating scene 1 of 4...';
 
-const timer=setInterval(()=>{
-remaining--;
-status.textContent='Creating video... '+Math.max(remaining,0)+'s';
-if(remaining<=0){
-clearInterval(timer);
+let lastScene=-1;
+const check=setInterval(()=>{
+const elapsed=(performance.now()-startTime)/1000;
+const scene=Math.min(3,Math.floor(elapsed/(duration/4)));
+if(scene!==lastScene){
+lastScene=scene;
+status.textContent='Creating scene '+(scene+1)+' of 4...';
+}
+if(elapsed>=duration){
+clearInterval(check);
 if(recorder.state==='recording')recorder.stop();
 }
-},1000);
+},250);
 
-}catch(error){
-active=false;
-cancelAnimationFrame(animation);
-status.textContent='Error: '+error.message;
+}catch(e){
+running=false;
+status.textContent='Error: '+e.message;
 btn.disabled=false;
 }
 }
