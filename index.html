@@ -3,130 +3,271 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HV AI Studio</title>
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;background:#090910;color:white;
- font-family:Arial,sans-serif;
-}
-header{
- padding:22px 7%;display:flex;
- justify-content:space-between;align-items:center;
- border-bottom:1px solid #292438;
-}
-.logo{font-size:25px;font-weight:bold;color:#a78bfa}
+body{margin:0;background:#090910;color:white;font-family:Arial,sans-serif}
+header{padding:20px 6%;border-bottom:1px solid #30263f}
+.logo{font-size:25px;font-weight:bold;color:#ad82ff}
 .logo span{color:white}
-.tag{color:#aaa;font-size:13px}
-main{max-width:850px;margin:55px auto;padding:20px}
-h1{text-align:center;font-size:36px}
-h1 span{color:#a78bfa}
-.sub{text-align:center;color:#aaa;line-height:1.8}
-.panel{
- background:#151420;border:1px solid #302943;
- padding:25px;border-radius:18px;margin-top:35px;
-}
-label{display:block;margin:18px 0 10px;font-weight:bold}
+main{max-width:850px;margin:35px auto;padding:15px}
+h1{text-align:center;font-size:30px}
+h1 span{color:#ad82ff}
+.desc{text-align:center;color:#aaa;line-height:1.8}
+.panel{background:#171522;padding:22px;border:1px solid #39304a;border-radius:17px;margin-top:25px}
+label{display:block;margin:18px 0 9px;font-weight:bold}
 textarea,select{
- width:100%;background:#0c0b14;
- border:1px solid #393149;border-radius:10px;
- padding:14px;color:white;font-size:15px;
+width:100%;padding:14px;background:#0c0b13;
+color:white;border:1px solid #403650;border-radius:10px;font-size:15px
 }
-textarea{height:140px;resize:vertical}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-button{
- width:100%;padding:16px;border:0;
- border-radius:12px;background:linear-gradient(90deg,#7041d8,#a855f7);
- color:white;font-size:17px;font-weight:bold;
- margin-top:25px;cursor:pointer;
+textarea{height:110px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button,.download{
+border:0;border-radius:10px;padding:15px;background:#874ce5;
+color:white;font-size:16px;font-weight:bold;cursor:pointer;
+display:block;text-align:center;width:100%;margin-top:20px;text-decoration:none
 }
-button:active{opacity:.8}
-.note{color:#aaa;font-size:12px;text-align:center;margin-top:15px}
-#message{
- display:none;background:#211b34;
- border:1px solid #7041d8;padding:15px;
- border-radius:10px;margin-top:20px;line-height:1.7;
-}
-footer{text-align:center;color:#777;padding:35px;font-size:13px}
-@media(max-width:550px){
- h1{font-size:28px}
- .grid{grid-template-columns:1fr}
- main{margin:25px auto}
-}
+button:disabled{opacity:.5}
+canvas{width:100%;display:block;border-radius:12px;background:#111}
+#result{margin-top:25px;display:none}
+video{width:100%;border-radius:12px;margin-top:15px}
+#status{color:#c5a5ff;text-align:center;margin-top:15px}
+.small{color:#999;font-size:12px;text-align:center}
+footer{text-align:center;padding:35px;color:#777}
+@media(max-width:500px){.grid{grid-template-columns:1fr}h1{font-size:25px}}
 </style>
 </head>
 <body>
 
 <header>
- <div class="logo">HV <span>AI STUDIO</span></div>
- <div class="tag">AI VIDEO GENERATOR</div>
+<div class="logo">HV <span>AI STUDIO</span></div>
 </header>
 
 <main>
- <h1>اصنع فيديوهاتك <span>بالذكاء الاصطناعي</span></h1>
- <p class="sub">
- حول أفكارك إلى فيديوهات إبداعية باستخدام الذكاء الاصطناعي.
- اكتب وصف الفيديو واترك الباقي للتقنية.
- </p>
+<h1>Create Your <span>Video</span></h1>
+<p class="desc">حوّل أفكارك إلى فيديوهات متحركة بسهولة.</p>
 
- <section class="panel">
-  <label>وصف الفيديو (Prompt)</label>
-  <textarea id="prompt" placeholder="اكتب وصف الفيديو الذي تريد إنشاءه بالتفصيل..."></textarea>
+<section class="panel">
+<label>Video Description</label>
+<textarea id="prompt" placeholder="اكتب وصف الفيديو هنا..."></textarea>
 
-  <div class="grid">
-   <div>
-    <label>مدة الفيديو</label>
-    <select id="duration">
-     <option value="15">15 Seconds</option>
-     <option value="30">30 Seconds</option>
-    </select>
-   </div>
-   <div>
-    <label>أبعاد الفيديو</label>
-    <select id="ratio">
-     <option value="9:16">9:16 - TikTok / Shorts</option>
-     <option value="16:9">16:9 - YouTube</option>
-     <option value="1:1">1:1 - Square</option>
-    </select>
-   </div>
-  </div>
+<div class="grid">
+<div>
+<label>Duration</label>
+<select id="duration">
+<option value="15">15 Seconds</option>
+<option value="30">30 Seconds</option>
+</select>
+</div>
+<div>
+<label>Aspect Ratio</label>
+<select id="ratio">
+<option value="9:16">9:16 Vertical</option>
+<option value="16:9">16:9 Landscape</option>
+<option value="1:1">1:1 Square</option>
+</select>
+</div>
+</div>
 
-  <label>أسلوب الفيديو</label>
-  <select id="style">
-   <option>Cinematic</option>
-   <option>Realistic</option>
-   <option>Anime</option>
-   <option>3D Animation</option>
-   <option>Fantasy</option>
-   <option>Cartoon</option>
-  </select>
+<label>Visual Style</label>
+<select id="style">
+<option value="purple">Purple Cinematic</option>
+<option value="blue">Blue Galaxy</option>
+<option value="pink">Pink Dream</option>
+<option value="dark">Dark Fantasy</option>
+</select>
 
-  <button onclick="generate()">Generate Video ✨</button>
+<button id="generate" onclick="createVideo()">Generate Video ✨</button>
+<div id="status"></div>
 
-  <div id="message"></div>
-  <p class="note">HV AI Studio — Your imagination, powered by AI.</p>
- </section>
+<div id="result">
+<label>Video Preview</label>
+<video id="preview" controls playsinline></video>
+<a id="download" class="download" download="HV-AI-Video.webm">Download Video ↓</a>
+</div>
+
+<p class="small">Free Video Creator • HV AI Studio</p>
+</section>
+
+<section class="panel">
+<label>Live Preview</label>
+<canvas id="screen" width="720" height="1280"></canvas>
+</section>
 </main>
 
-<footer>© 2026 HV AI Studio. All rights reserved.</footer>
+<footer>© 2026 HV AI Studio</footer>
 
 <script>
-function generate(){
- const prompt=document.getElementById('prompt').value.trim();
- const message=document.getElementById('message');
+const canvas=document.getElementById('screen');
+const ctx=canvas.getContext('2d');
+let animation=null;
+let start=0;
+let active=false;
 
- if(!prompt){
-  alert('من فضلك اكتب وصف الفيديو أولاً');
-  return;
- }
+function resizeCanvas(){
+const ratio=document.getElementById('ratio').value;
+if(ratio==='9:16'){canvas.width=720;canvas.height=1280}
+if(ratio==='16:9'){canvas.width=1280;canvas.height=720}
+if(ratio==='1:1'){canvas.width=900;canvas.height=900}
+}
+document.getElementById('ratio').addEventListener('change',()=>{
+resizeCanvas();
+});
+resizeCanvas();
 
- message.style.display='block';
- message.innerHTML=
- 'تم استلام وصف الفيديو بنجاح! ✨<br>'+
- 'الواجهة جاهزة، والخطوة التالية هي ربط محرك توليد الفيديو الحقيقي.';
+function draw(time){
+if(!active)return;
+
+const w=canvas.width,h=canvas.height;
+const t=time/1000;
+const style=document.getElementById('style').value;
+const colors={
+purple:['#170a35','#7139b9'],
+blue:['#031b38','#155caa'],
+pink:['#3c102c','#b54a94'],
+dark:['#080808','#36304c']
+};
+const c=colors[style];
+const gradient=ctx.createLinearGradient(0,0,w,h);
+gradient.addColorStop(0,c[0]);
+gradient.addColorStop(1,c[1]);
+ctx.fillStyle=gradient;
+ctx.fillRect(0,0,w,h);
+
+for(let i=0;i<35;i++){
+const x=(Math.sin(t*.4+i*12)*.5+.5)*w;
+const y=(Math.cos(t*.3+i*7)*.5+.5)*h;
+ctx.beginPath();
+ctx.arc(x,y,2+Math.sin(t+i)*2,0,Math.PI*2);
+ctx.fillStyle='rgba(255,255,255,.45)';
+ctx.fill();
+}
+
+const title=document.getElementById('prompt').value.trim();
+const words=title.length>90?title.slice(0,90)+'...':title;
+const fontSize=Math.min(w*.075,48);
+
+ctx.save();
+ctx.direction='rtl';
+ctx.textAlign='center';
+ctx.fillStyle='rgba(255,255,255,.9)';
+ctx.font='bold '+fontSize+'px Arial';
+
+const lines=[];
+let line='';
+words.split(' ').forEach(word=>{
+if((line+' '+word).length>24){
+lines.push(line);
+line=word;
+}else line+=(line?' ':'')+word;
+});
+if(line)lines.push(line);
+
+const lineHeight=fontSize*1.5;
+const centerY=h/2-(lines.length*lineHeight)/2;
+lines.forEach((l,i)=>{
+ctx.fillText(l,w/2,centerY+i*lineHeight);
+});
+ctx.restore();
+
+ctx.textAlign='center';
+ctx.fillStyle='#ffffff';
+ctx.font='bold '+Math.min(w*.06,35)+'px Arial';
+ctx.fillText('HV AI STUDIO',w/2,h*.91);
+
+ctx.textAlign='center';
+ctx.font='18px Arial';
+ctx.fillStyle='rgba(255,255,255,.65)';
+ctx.fillText('CREATIVE VIDEO STUDIO',w/2,h*.95);
+
+animation=requestAnimationFrame(draw);
+}
+
+async function createVideo(){
+const prompt=document.getElementById('prompt').value.trim();
+if(!prompt){alert('اكتب وصف الفيديو أولاً');return}
+if(!window.MediaRecorder || !canvas.captureStream){
+alert('متصفحك لا يدعم تسجيل الفيديو. جرب Chrome.');
+return;
+}
+
+const btn=document.getElementById('generate');
+const status=document.getElementById('status');
+const result=document.getElementById('result');
+btn.disabled=true;
+result.style.display='none';
+
+try{
+resizeCanvas();
+active=true;
+draw(performance.now());
+
+const stream=canvas.captureStream(30);
+let mime='video/webm';
+if(MediaRecorder.isTypeSupported('video/webm;codecs=vp9')){
+mime='video/webm;codecs=vp9';
+}else if(MediaRecorder.isTypeSupported('video/webm;codecs=vp8')){
+mime='video/webm;codecs=vp8';
+}else if(!MediaRecorder.isTypeSupported('video/webm')){
+throw new Error('صيغة الفيديو غير مدعومة في المتصفح');
+}
+
+const recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:2500000});
+const chunks=[];
+
+recorder.ondataavailable=e=>{
+if(e.data.size>0)chunks.push(e.data);
+};
+
+recorder.onstop=()=>{
+active=false;
+cancelAnimationFrame(animation);
+stream.getTracks().forEach(track=>track.stop());
+
+const blob=new Blob(chunks,{type:mime});
+const url=URL.createObjectURL(blob);
+const preview=document.getElementById('preview');
+preview.src=url;
+
+const download=document.getElementById('download');
+download.href=url;
+download.download='HV-AI-Video.webm';
+
+result.style.display='block';
+status.textContent='Video created successfully!';
+btn.disabled=false;
+};
+
+recorder.onerror=()=>{
+active=false;
+stream.getTracks().forEach(track=>track.stop());
+status.textContent='Recording error. Please try again.';
+btn.disabled=false;
+};
+
+recorder.start();
+
+const seconds=Number(document.getElementById('duration').value);
+let remaining=seconds;
+status.textContent='Creating video... '+remaining+'s';
+
+const timer=setInterval(()=>{
+remaining--;
+status.textContent='Creating video... '+Math.max(remaining,0)+'s';
+if(remaining<=0){
+clearInterval(timer);
+if(recorder.state==='recording')recorder.stop();
+}
+},1000);
+
+}catch(error){
+active=false;
+cancelAnimationFrame(animation);
+status.textContent='Error: '+error.message;
+btn.disabled=false;
+}
 }
 </script>
-
 </body>
 </html>
